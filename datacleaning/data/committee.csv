@@ -1,0 +1,50 @@
+,name,thomas_id,type
+0,House Committee on Agriculture,HSAG,house
+1,House Committee on Appropriations,HSAP,house
+2,House Committee on Armed Services,HSAS,house
+3,House Committee on Financial Services,HSBA,house
+4,House Committee on the Budget,HSBU,house
+5,House Committee on Education and Labor,HSED,house
+6,House Committee on Foreign Affairs,HSFA,house
+7,House Committee on Oversight and Reform,HSGO,house
+8,House Committee on House Administration,HSHA,house
+9,House Committee on Homeland Security,HSHM,house
+10,House Committee on Energy and Commerce,HSIF,house
+11,House Committee on Natural Resources,HSII,house
+12,House Permanent Select Committee on Intelligence,HLIG,house
+13,House Committee on the Judiciary,HSJU,house
+14,House Committee on Transportation and Infrastructure,HSPW,house
+15,House Committee on Rules,HSRU,house
+16,House Committee on Small Business,HSSM,house
+17,House Committee on Ethics,HSSO,house
+18,"House Committee on Science, Space, and Technology",HSSY,house
+19,House Committee on Veterans' Affairs,HSVR,house
+20,House Committee on Ways and Means,HSWM,house
+21,House Select Committee on the Climate Crisis,HSCN,house
+22,House Select Committee on the Modernization of Congress,HSMH,house
+23,Commission on Security and Cooperation in Europe,JCSE,joint
+24,Joint Economic Committee,JSEC,joint
+25,Joint Committee on the Library,JSLC,joint
+26,Joint Committee on Printing,JSPR,joint
+27,Joint Committee on Taxation,JSTX,joint
+28,United States Senate Caucus on International Narcotics Control,SCNC,senate
+29,Senate Select Committee on Ethics,SLET,senate
+30,Senate Committee on Indian Affairs,SLIA,senate
+31,Senate Select Committee on Intelligence,SLIN,senate
+32,Senate Special Committee on Aging,SPAG,senate
+33,"Senate Committee on Agriculture, Nutrition, and Forestry",SSAF,senate
+34,Senate Committee on Appropriations,SSAP,senate
+35,Senate Committee on Armed Services,SSAS,senate
+36,"Senate Committee on Banking, Housing, and Urban Affairs",SSBK,senate
+37,Senate Committee on the Budget,SSBU,senate
+38,"Senate Committee on Commerce, Science, and Transportation",SSCM,senate
+39,Senate Committee on Energy and Natural Resources,SSEG,senate
+40,Senate Committee on Environment and Public Works,SSEV,senate
+41,Senate Committee on Finance,SSFI,senate
+42,Senate Committee on Foreign Relations,SSFR,senate
+43,Senate Committee on Homeland Security and Governmental Affairs,SSGA,senate
+44,"Senate Committee on Health, Education, Labor, and Pensions",SSHR,senate
+45,Senate Committee on the Judiciary,SSJU,senate
+46,Senate Committee on Rules and Administration,SSRA,senate
+47,Senate Committee on Small Business and Entrepreneurship,SSSB,senate
+48,Senate Committee on Veterans' Affairs,SSVA,senate

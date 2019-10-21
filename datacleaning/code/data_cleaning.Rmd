@@ -1,0 +1,305 @@
+---
+title: 'Data Cleaning By Violet Yao'
+author: "PS239T"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output:
+  html_document:
+    toc: true
+    toc_depth: 4
+    toc_float: true
+    df_print: paged
+    theme: flatly
+    highlight: pygments
+---
+
+See github page for more information about dataset: https://github.com/unitedstates/congress-legislators/blob
+
+
+
+
+
+**********************************************************
+
+# SET UP 
+
+```{r}
+# remove all objects
+rm(list=ls())
+
+# Unload all packages 
+library(pacman)
+pacman::p_unload(all)
+
+# Add packages 
+pacman::p_load(
+  tidyverse, #dplyr, readr, etc.
+  data.table, #fread() 
+  foreign, #load data types including stata .dta files 
+  magrittr, #%<>% operator
+  skimr #for summerising
+)
+```
+
+## Check wd
+
+Make sure working directory is datacleaning/code
+```{r}
+getwd()
+```
+
+
+**********************************************************
+
+# load data
+
+Raw data is in yaml format. I did some parsing in Python and converted them to csv.
+```{r}
+data_path <- "../data/"
+
+# Read csv of "legislators.csv"
+legislators <- read_csv(paste0(data_path, "legislators.csv")) 
+
+# Read csv of  "committee.csv"
+committee <- read_csv(paste0(data_path, "committee.csv")) 
+
+# Read csv of "committee_members.csv"
+committee_members <- read_csv(paste0(data_path, "committee_members.csv")) 
+```
+
+## Save Raw Data
+```{r}
+save(legislators, committee, committee_members, 
+     file="../data/total.RData")
+```
+
+
+**********************************************************
+# Look at data 
+```{r}
+legislators %>% glimpse()
+
+```
+
+```{r}
+committee %>% glimpse()
+```
+
+```{r}
+committee_members %>% glimpse()
+```
+
+```{r}
+# Rename column for merging
+committee %<>% rename(id = thomas_id) 
+committee_members %<>% rename(id = comm_id) 
+```
+
+
+## join committee and committee_members
+```{r}
+# Start with committee as the base dataset and add 
+merged <- committee
+
+# Add columns with data from committee, matching on 'id' variable 
+merged <- left_join(x = merged,
+                          y = committee_members,
+                          by = "id")
+```
+
+
+```{r}
+# rename column for merging
+legislators %<>% rename(leg_id = id) 
+```
+
+```{r}
+# Add columns with data from legislators, matching on 'leg_id' variable
+merged <- left_join(x = merged,
+                          y = legislators,
+                          by = "leg_id")
+```
+
+## check merged
+```{r}
+merged %>% glimpse()
+```
+
+
+```{r}
+# remove dummy column
+merged = subset(merged, select=-c(X1.x, X1.y))
+```
+
+```{r}
+# remove another dummy column
+merged = subset(merged, select=-c(X1))
+```
+
+```{r}
+merged %>% glimpse()
+```
+
+
+## Save combined data
+```{r}
+save(merged, file="../data/merged.RData")
+```
+
+# Summaries
+
+```{r}
+merged %>% skimr::skim()
+```
+
+## Check missing data. Make sure that your missing data is coded correctly. 
+```{r}
+# Trim whitespace from ends of all character variables 
+merged %<>%
+  mutate_if(is.character, list(str_trim))
+
+# Check for empty cells 
+merged %>%
+  # Keep only character variables 
+  select_if(is.character) %>%
+  # Recode character variables as 1 if cell is empty 
+  mutate_all(list(~ifelse(.=="",1,0))) %>%
+  # Add up empty cells for each character variable 
+  summarise_all(sum, na.rm=T) %>%
+  # Transpose data for visibility 
+  t() 
+```
+
+## rename confusing columns
+```{r}
+colnames(merged)[colnames(merged) == 'name'] <- 'committee_name'
+colnames(merged)[colnames(merged) == 'type'] <- 'committee_type'
+colnames(merged)[colnames(merged) == 'id'] <- 'committee_id'
+colnames(merged)[colnames(merged) == 'leg_id'] <- 'legislator_id'
+```
+
+## take a look at merged after renaming
+```{r}
+merged %>% glimpse()
+```
+
+# Create five or more variables using mutate().
+```{r}
+merged %<>%
+  # Turn race into factor var
+  mutate(committee_type = as.factor(committee_type)) %>% 
+  # Create binary variable for suicide
+  mutate(is_house = ifelse(committee_type == "house", T, F))
+```
+
+```{r}
+merged %<>%
+  # Add year variable 
+  mutate(birth_year = year(birthday)) %>%
+  # Add year variable 
+  mutate(birth_month = month(birthday)) %>%
+    # Add year variable 
+  mutate(birth_day = mday(birthday))
+```
+
+```{r}
+merged %<>%
+  # Add year variable 
+  mutate(age = 2019 - birth_year) 
+```
+
+create new variable legislator_age using base r 
+```{r}
+merged$legislator_age <- 2019 - merged$birth_year
+```
+
+As above, I created more than variables using mutate().
+
+These variables include at least one of each data type (character, logical, numeric, and integer) as well as at least one factor variable. 
+For lesgislator_age, I showed that I created with base r instead of dplyr. 
+```{r}
+merged %>% glimpse()
+```
+
+
+### Generate a summary statistic for at least five variables using summarize().
+
+```{r}
+merged %>% glimpse()
+
+
+merged %>% 
+  summarise_if(is.numeric, mean, na.rm=T)
+
+merged %>% 
+  group_by(committee_type) %>%
+  summarise(avg=mean(age, na.rm=T),
+            sd=sd(age, na.rm=T))
+
+merged %>% 
+  group_by(committee_name) %>%
+  summarise(avg=mean(age, na.rm=T),
+            sd=sd(age, na.rm=T))
+
+merged %>% 
+  group_by(committee_type, committee_name) %>%
+  summarise(n=n()) 
+
+merged %>% 
+  group_by(is_house) %>%
+  summarise(n=n()) 
+```
+```{r}
+# use base r for summarizing legislator age
+summary(merged$legislator_age)
+```
+
+
+## use of spread and gather
+```{r}
+# Frequency of weapons 
+grouped_by_name<- merged %>% 
+  group_by(committee_type, committee_name) %>% 
+  summarise(total=n()) 
+
+
+head(grouped_by_name)
+# Spread out totals by year 
+grouped_by_name %>% 
+  spread(key=committee_name, value=total)
+
+head(grouped_by_name)
+# Restack data 
+grouped_by_name %>% 
+  spread(key=committee_name, value=total) %>%
+  gather(key=committee_name, value=total, -committee_type)
+
+head(grouped_by_name)
+```
+
+save data for visualizations
+
+```{r}
+save(merged, file="../data/final.RData")
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

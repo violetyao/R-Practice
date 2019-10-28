@@ -1,0 +1,153 @@
+---
+title: "Data Visualization by Violet Yao"
+author: "PS239T"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output:
+  html_document:
+    toc: true
+    toc_depth: 4
+    toc_float: true
+    df_print: paged
+    theme: flatly
+    highlight: pygments
+---
+
+
+
+###  Setup environment
+
+```{r}
+# remove all objects
+rm(list=ls())
+
+# check working directory
+getwd()
+
+# Unload all packages 
+library(pacman)
+pacman::p_unload(all)
+
+# Add packages 
+pacman::p_load(
+  tidyverse, #ggplot, dplyr, readr, etc.
+  ggthemes, #extra themes
+  viridis #great colors
+)
+```
+
+### Get cleaned dataset
+final.RData is the final output by data cleaning rmd.
+
+```{r}
+dat <- get(load("../data/final.RData"))
+```
+
+
+```{r}
+# Change default plot dimensions
+knitr::opts_chunk$set(fig.width=12, fig.height=8)
+
+# Load themes
+source("../Set-up/visualisation.R")
+```
+
+### Take a look at data
+check that it does have character, logical, numeric, integer, and factor variables. 
+```{r}
+glimpse(dat)
+```
+```{r}
+summary(dat)
+```
+## ggplot2
+
+## univariate
+
+### univariate 1 (char) - committee_id
+Explanation: committee_id is qualitative and categorical, thus I am using bar plot.
+```{r}
+ggplot(data=dat, aes(committee_id)) + geom_bar( color = "black", fill = "gray")  + 
+                         ggtitle("committee_id count")
+```
+
+### univariate 2 (logical) - is_house
+Explanation: is_house is qualitative and categorical, thus I choose bar plot
+```{r}
+ggplot(data=dat, aes(is_house)) + geom_bar( color = "black", fill = "gray") +
+                         ggtitle("is_house count")
+```
+
+### univariate 3 (numeric) - age
+Explanation: age is quantitive and continuous, I think histogram, density, and boxplot are all nice representations. My least fav is boxplot because it contains less information, just having 25/50/70 percentile instead of more detailed distribution. 
+```{r}
+ggplot(data=dat, aes(age)) + geom_histogram(bins = 30, color = "black", fill = "gray") + 
+                         ggtitle("age count")
+
+ggplot(data=dat, aes(age)) + geom_density( color = "black", fill = "gray") + 
+                         ggtitle("age count")
+
+ggplot(dat, aes(x=factor(1), y=age)) +
+  geom_boxplot(width = 0.4, fill = "white") +
+  scale_colour_viridis_d(option="A") + 
+  labs(x = NULL)  + 
+                         ggtitle("age count")
+```
+
+### univariate 4 (integer) - birth_year
+Explanation: Histogram because birth_year is continuous. 
+```{r}
+ggplot(data=dat, aes(birth_year)) + geom_histogram(color = "black", fill = "gray") + 
+                         ggtitle("birth_year distribution")
+```
+
+
+### univariate 5 (factor) - committee_type
+Explanation: Barplot because committee_type is categorical.
+```{r}
+ggplot(data=dat, aes(committee_type)) + geom_bar( color = "black", fill = "gray")+ 
+                         ggtitle("committee_type distribution")
+```
+
+
+## bivariate 
+
+### bivariate 1.1 - age & committee_type - overlayyed histogram
+Explanation: Histogram appears most intuitive to me because it contains lots of information - count age distribution, while showing committee_type percentages of each specific age. 
+```{r}
+
+ggplot(data=dat) + geom_histogram(aes(x=age, col = committee_type, fill = committee_type), binwidth = 1/4) +
+  scale_colour_viridis_d(option="D") +
+  ggtitle("age & committee_type")
+
+ggplot(data=dat, aes(age)) + geom_histogram(aes(color = committee_type, fill = committee_type),
+                         alpha = 0.4, position = "identity") + 
+                         scale_colour_viridis_d(option="A") + 
+                         ggtitle("age & committee_type")
+```
+### bivariate 1.2 - committee_type & age - side-by-side box plot
+Explanation: for each category of committee_type, use box plot to show the distribution of age, a continuous variable. 
+```{r}
+g <- ggplot(dat, aes(committee_type, age))
+g + geom_boxplot(varwidth=T, fill="lightgray")  + 
+    ggtitle("committee_type & age ")
+```
+
+### bivariate 2- committee_id & committee_type
+Explanation: when x and y are both categorical data, I am usually thinking of scatterplot. barplot does not appear a good alternative because the height of bar would not mean anything numeric.
+
+```{r}
+ggplot(data=dat, aes(x=committee_id, y=committee_type)) + geom_point()
+                    
+```
+
+
+
+## 3 or more variable: committee_name, age, and committee_type
+Explanation: Side by side box plot, while boxplot from each committee_type having a different color - provide nice summaries on both age distribution and committee_type for each committee_name.
+```{r}
+ggplot(data = dat, aes(x = committee_name, y = age, col=committee_type)) +
+  geom_boxplot() +
+  theme_ed + 
+                         ggtitle("commitee_name, age, and committee_type")
+```
+
